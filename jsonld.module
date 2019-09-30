@@ -136,8 +136,8 @@ function jsonld_create_script_tag($object) {
          *
          * @see islandora_scholar:islandora_scholar_create_meta_tags
          **/
-        module_load_include('module', 'islandora_google_scholar', 'islandora_google_scholar');
-        $tags = islandora_google_scholar_create_meta_tags($object);
+         module_load_include('inc', 'islandora_scholar', 'includes/google_scholar');
+         $tags = islandora_scholar_create_meta_tags($object);
 
         if ($tags) {
           $jsonLd['datePublished'] = $tags['citation_publication_date'];
