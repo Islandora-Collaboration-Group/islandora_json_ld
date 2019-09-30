@@ -59,8 +59,7 @@ function jsonld_create_script_tag($object) {
     $mods = NULL;
     if ($object['MODS'] instanceof DOMNode) {
       $mods = simplexml_import_dom($object['MODS']);
-    }
-    else {
+    } else {
       try {
         //Load MODS data stream into  a simpleXML object for easy traversal
         $mods = simplexml_load_string($object['MODS']->content);
@@ -105,9 +104,21 @@ function jsonld_create_script_tag($object) {
         ];
         // Get title and subtitle
         $title_results = $mods->xpath(variable_get('islandora_scholar_xpaths_title', '//mods:mods[1]/mods:titleInfo/mods:title'));
-        $title = (string) reset($title_results);
+        // Limit title to no more than 100 characters
+        $title = substr((string) reset($title_results), 0, 100);
         $subtitle_results = $mods->xpath(variable_get('islandora_scholar_xpaths_title_sub_title', '//mods:mods[1]/mods:titleInfo/mods:subTitle'));
         $subtitle = (string) reset($subtitle_results);
+
+        // Set publisher
+        $publisher_result = $mods->xpath('//mods:mods[1]/mods:originInfo/mods:publisher');
+        $publisher = (string) reset($publisher_result);
+        if (!empty($publisher)) {
+          $jsonLd['publisher'] = [
+            '@type' => 'Person',
+            'name' => $publisher
+          ];
+        }
+
 
         if (!empty($title)) {
           if (!empty($subtitle)) {
@@ -125,9 +136,9 @@ function jsonld_create_script_tag($object) {
          *
          * @see islandora_scholar:islandora_scholar_create_meta_tags
          **/
-        module_load_include('inc', 'islandora_scholar', 'includes/google_scholar');
-        $tags = islandora_scholar_create_meta_tags($object);
-        
+        module_load_include('module', 'islandora_google_scholar', 'islandora_google_scholar');
+        $tags = islandora_google_scholar_create_meta_tags($object);
+
         if ($tags) {
           $jsonLd['datePublished'] = $tags['citation_publication_date'];
 
@@ -137,7 +148,7 @@ function jsonld_create_script_tag($object) {
               'name' => $author,
               'givenName' => (isset($author_parts[1]) ? $author_parts[1] : ''),
               'familyName' => (isset($author_parts[0]) ? $author_parts[0] : ''),
-              '@type' => 'Person',
+              '@type' => 'Person'
             ];
           }
         }
