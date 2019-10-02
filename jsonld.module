@@ -105,7 +105,7 @@ function jsonld_create_script_tag($object) {
         // Get title and subtitle
         $title_results = $mods->xpath(variable_get('islandora_scholar_xpaths_title', '//mods:mods[1]/mods:titleInfo/mods:title'));
         // Limit title to no more than 100 characters
-        $title = substr((string) reset($title_results), 0, 100);
+        $title = (string) reset($title_results);
         $subtitle_results = $mods->xpath(variable_get('islandora_scholar_xpaths_title_sub_title', '//mods:mods[1]/mods:titleInfo/mods:subTitle'));
         $subtitle = (string) reset($subtitle_results);
 
@@ -128,7 +128,7 @@ function jsonld_create_script_tag($object) {
             $jsonLd['name'] = $title;
           }
           // Set headline
-          $jsonLd['headline'] = $jsonLd['name'];
+          $jsonLd['headline'] = mb_strimwidth($jsonLd['name'], 0, 100, '...');
         }
 
         /**
