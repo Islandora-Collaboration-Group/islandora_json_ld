@@ -5,7 +5,7 @@
 Automatically embeds JSON-LD in object pages. The JSON-LD fields are mapped from an object's MODS record as follows.
 
 cModel|	Schema.org|
-|--------- |-------------| 
+|--------- |-------------|
 |ir:thesisCModel	| @type="Thesis"|
 ir:citationCModel |	@type="ScholarlyArticle"
 islandora:sp_basic_image |	@type="ImageObject"
@@ -23,7 +23,7 @@ islandora:sp_disk_image |	@type="Dataset"
 islandora:sp_web_archive | @type="WebPage"
 
 XPath|Schema.org|
-|--------- |-------------| 
+|--------- |-------------|
 /mods:titleInfo/mods:title|	name
 /mods:name[@type="corporate"][mods:role/mods:roleTerm = "Degree grantor"]/mods:namePart	| sourceOrganization @type="CollegeOrUniversity"
 /mods:name/mods:role[mods:roleTerm = "author"]/../mods:namePart[@type="family"]	|	author @type="Person"
@@ -41,8 +41,7 @@ XPath|Schema.org|
 This module requires the following modules/libraries:
 
 * [Islandora](https://github.com/islandora/islandora)
-* [Islandora Scholar](https://github.com/islandora/islandora_scholar)
-* [Islandora Google Scholar](https://github.com/Born-Digital-US/islandora_scholar/tree/7.x/modules/islandora_google_scholar)
+* [Islandora Scholar 7.x-1.13](https://github.com/islandora/islandora_scholar) which was refactored to include what used to be the submodule "Islandora Google Scholar."
 * [Islandora Solr](https://github.com/Islandora/islandora_solr_search)
 * [Citeproc](https://github.com/Islandora/islandora_scholar/tree/7.x/modules/citeproc)
 * [CSL](https://github.com/Islandora/islandora_scholar/tree/7.x/modules/csl)
@@ -51,6 +50,16 @@ This module requires the following modules/libraries:
 ## Installation
 
 Install as usual, see [this](https://drupal.org/documentation/install/modules-themes/modules-7) for further information.
+
+Citeproc is a 3rd party code dependency, typically managed by Composer. If you're already using Islandora Scholar you've probably already set this up, but if you haven't you'll get an error like this:
+
+```
+Error: Class 'Seboettg\CiteProc\CiteProc' not found in citeproc_get_citeproc_php_instance() (line 119 of /var/www/html/sites/all/modules/islandora/islandora_scholar/modules/citeproc/citeproc.module).
+```
+
+To fix you should follow the main Islandora Scholar install [dependency installation instructions](https://github.com/islandora/islandora_scholar/#requirements). Typically this means:
+
+* `cd` into the `sites/all/modules/islandora/islandora_scholar/modules/citeproc` folder and run `composer install`
 
 ## Configuration
 
@@ -68,6 +77,7 @@ Having problems or solved a problem? Check out the Islandora google groups for a
 Current maintainers:
 
 * Hertzel Armengol <emudojo@gmail.com>
+* Born-Digital <hello@born-digital.com>
 
 ## Development
 
