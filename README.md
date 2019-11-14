@@ -22,19 +22,22 @@ islandora:organizationCModel |	@type="CollegeorUniversity"
 islandora:sp_disk_image |	@type="Dataset"
 islandora:sp_web_archive | @type="WebPage"
 
-XPath|Schema.org|
-|--------- |-------------|
-/mods:titleInfo/mods:title|	name
-/mods:name[@type="corporate"][mods:role/mods:roleTerm = "Degree grantor"]/mods:namePart	| sourceOrganization @type="CollegeOrUniversity"
-/mods:name/mods:role[mods:roleTerm = "author"]/../mods:namePart[@type="family"]	|	author @type="Person"
-/mods:originInfo/mods:dateIssued	| datePublished
-/mods:abstract	| description
-/mods:part/mods:subject/mods:topic	|	keywords
-/mods:extent[@unit="page"]/mods:start	| pageStart
-/mods:identifier[@type="doi"]	|	identifier @type:"PropertyValue" propertyID:"DOI"
-/mods:extension/etd:degree/etd:name, /mods:extension/etd:degree/etd:discipline	| inSupportOf
-/mods:language	| inLanguage
-/mods:nameIdentifier	|	@type:schema:Person @id
+XPath|Schema.org|Drupal Variable|
+|--------- |-------------|-------------|
+/mods:titleInfo/mods:title|	name | islandora_scholar_xpaths_title(//mods:mods[1]/mods:titleInfo/mods:title)
+/mods:name[@type="corporate"][mods:role/mods:roleTerm = "Degree grantor"]/mods:namePart	| sourceOrganization @type="CollegeOrUniversity" | site_name
+/mods:name/mods:role[mods:roleTerm = "author"]/../mods:namePart[@type="family"]	|	author @type="Person" | No variable
+/mods:originInfo/mods:dateIssued	| datePublished | islandora_scholar_xpaths_origin_date(//mods:originInfo/mods:dateIssued)
+/mods:abstract	| description | islandora_scholar_xpaths_abstract(//mods:mods[1]/mods:abstract)
+/mods:part/mods:subject/mods:topic	|	keywords | islandora_scholar_xpaths_topics(//mods:subject)
+| Subtitle | islandora_scholar_xpaths_title_sub_title(//mods:mods[1]/mods:titleInfo/mods:subTitle)
+/mods:extent[@unit="page"]/mods:start	| pageStart | islandora_scholar_xpaths_start_page(//mods:extent[@unit="page"]/mods:start)
+/mods:extent[@unit="page"]/mods:end	| pageEnd | islandora_scholar_xpaths_end_page(//mods:extent[@unit="page"]/mods:start)
+/mods:identifier[@type="doi"]	|	identifier @type:"PropertyValue" propertyID:"DOI"| islandora_scholar_xpaths_doi(//mods:identifier[@type="doi"])
+/mods:extension/etd:degree/etd:name, /mods:extension/etd:degree/etd:discipline	| inSupportOf | No present
+/mods:language	| inLanguage | en
+/mods:nameIdentifier	|	@type:schema:Person @id | @id maps to the PID
+//mods:mods[1]/mods:originInfo/mods:publisher | Publisher | No variable
 
 ## Requirements
 
