@@ -61,99 +61,104 @@ function jsonld_create_script_tag($object) {
       $mods = simplexml_import_dom($object['MODS']);
     } else {
       try {
-        //Load MODS data stream into  a simpleXML object for easy traversal
-        $mods = simplexml_load_string($object['MODS']->content);
-        // Generate Identifiers
-        $jsonLd['@id'] = url("islandora/object/{$object->id}", ['absolute' => TRUE]);
-        $jsond_xp_indentifiers = variable_get('islandora_scholar_xpaths_identifiers', '//mods:mods[1]/mods:identifier[@type]');
-        $jsond_xp_indentifiers = $mods->xpath($jsond_xp_indentifiers);
-        $jsonLd_xp_abstract = variable_get('islandora_scholar_xpaths_abstract', '//mods:mods[1]/mods:abstract');
-        $jsonLd_xp_abstract = $mods->xpath($jsonLd_xp_abstract);
-        $jsonLd['description'] = (!empty($jsonLd_xp_abstract)) ? (string) end($jsonLd_xp_abstract) : '';
-        // Set identifier values
-        foreach ($jsond_xp_indentifiers as $jsond_indentifier) {
-          $attribute_name = $jsond_indentifier->attributes();
-          $jsonLd['identifier'][] = [
-            '@type' => 'PropertyValue',
-            'propertyID' => strval($attribute_name['type']),
-            'value' => strval($jsond_indentifier),
-          ];
-        }
-        $jsonLd['url'] = $GLOBALS['base_root'] . request_uri();
+        if ($mods) {
 
-        // Get topics
-        $jsonLd_xp_topics = variable_get('islandora_scholar_xpaths_topics', '//mods:subject');
-        $jsonLd_xp_topics = $mods->xpath($jsonLd_xp_topics);
-        foreach ($jsonLd_xp_topics as $topic) {
-          if (isset($topic->topic) && !empty(strval($topic->topic))) {
-            $jsonLd['keywords'][] = strval($topic->topic);
-          }
-        }
-        // Keywords or tags used to describe this content. Multiple entries in a keywords list are typically delimited by commas.
-        if (!empty($jsonLd['keywords'])) {
-          $jsonLd['keywords'] = implode(",", $jsonLd['keywords']);
-        }
-
-        // Set language
-        // TODO get this from the object or a configration when available
-        $jsonLd['inLanguage'] = "eng";
-        // Set authors for this particular piece of work
-        $jsonLd['sourceOrganization'] = [
-          '@type' => 'CollegeOrUniversity',
-          'name' => variable_get('site_name'),
-        ];
-        // Get title and subtitle
-        $title_results = $mods->xpath(variable_get('islandora_scholar_xpaths_title', '//mods:mods[1]/mods:titleInfo/mods:title'));
-        // Limit title to no more than 100 characters
-        $title = (string) reset($title_results);
-        $subtitle_results = $mods->xpath(variable_get('islandora_scholar_xpaths_title_sub_title', '//mods:mods[1]/mods:titleInfo/mods:subTitle'));
-        $subtitle = (string) reset($subtitle_results);
-
-        // Set publisher
-        $publisher_result = $mods->xpath('//mods:mods[1]/mods:originInfo/mods:publisher');
-        $publisher = (string) reset($publisher_result);
-        if (!empty($publisher)) {
-          $jsonLd['publisher'] = [
-            '@type' => 'Person',
-            'name' => $publisher
-          ];
-        }
-
-
-        if (!empty($title)) {
-          if (!empty($subtitle)) {
-            $jsonLd['name'] = "{$title}: {$subtitle}";
-          }
-          else {
-            $jsonLd['name'] = $title;
-          }
-          // Set headline
-          $jsonLd['headline'] = mb_strimwidth($jsonLd['name'], 0, 100, '...');
-        }
-
-        /**
-         * Date in which this particular publication was published
-         *
-         * @see islandora_scholar:islandora_scholar_create_meta_tags
-         **/
-         module_load_include('inc', 'islandora_scholar', 'includes/google_scholar');
-         $tags = islandora_scholar_create_meta_tags($object);
-
-        if ($tags) {
-          $jsonLd['datePublished'] = $tags['citation_publication_date'];
-
-          foreach ($tags['citation_author'] as $author) {
-            $author_parts = explode(', ', $author);
-            $jsonLd['author'][] = [
-              'name' => $author,
-              'givenName' => (isset($author_parts[1]) ? $author_parts[1] : ''),
-              'familyName' => (isset($author_parts[0]) ? $author_parts[0] : ''),
-              '@type' => 'Person'
+          //Load MODS data stream into  a simpleXML object for easy traversal
+          $mods = simplexml_load_string($object['MODS']->content);
+          // Generate Identifiers
+          $jsonLd['@id'] = url("islandora/object/{$object->id}", ['absolute' => TRUE]);
+          $jsond_xp_indentifiers = variable_get('islandora_scholar_xpaths_identifiers', '//mods:mods[1]/mods:identifier[@type]');
+          $jsond_xp_indentifiers = $mods->xpath($jsond_xp_indentifiers);
+          $jsonLd_xp_abstract = variable_get('islandora_scholar_xpaths_abstract', '//mods:mods[1]/mods:abstract');
+          $jsonLd_xp_abstract = $mods->xpath($jsonLd_xp_abstract);
+          $jsonLd['description'] = (!empty($jsonLd_xp_abstract)) ? (string) end($jsonLd_xp_abstract) : '';
+          // Set identifier values
+          foreach ($jsond_xp_indentifiers as $jsond_indentifier) {
+            $attribute_name = $jsond_indentifier->attributes();
+            $jsonLd['identifier'][] = [
+              '@type' => 'PropertyValue',
+              'propertyID' => strval($attribute_name['type']),
+              'value' => strval($jsond_indentifier),
             ];
           }
-        }
+          $jsonLd['url'] = $GLOBALS['base_root'] . request_uri();
 
-        return json_encode($jsonLd, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+          // Get topics
+          $jsonLd_xp_topics = variable_get('islandora_scholar_xpaths_topics', '//mods:subject');
+          $jsonLd_xp_topics = $mods->xpath($jsonLd_xp_topics);
+          foreach ($jsonLd_xp_topics as $topic) {
+            if (isset($topic->topic) && !empty(strval($topic->topic))) {
+              $jsonLd['keywords'][] = strval($topic->topic);
+            }
+          }
+          // Keywords or tags used to describe this content. Multiple entries in a keywords list are typically delimited by commas.
+          if (!empty($jsonLd['keywords'])) {
+            $jsonLd['keywords'] = implode(",", $jsonLd['keywords']);
+          }
+
+          // Set language
+          // TODO get this from the object or a configration when available
+          $jsonLd['inLanguage'] = "eng";
+          // Set authors for this particular piece of work
+          $jsonLd['sourceOrganization'] = [
+            '@type' => 'CollegeOrUniversity',
+            'name' => variable_get('site_name'),
+          ];
+          // Get title and subtitle
+          $title_results = $mods->xpath(variable_get('islandora_scholar_xpaths_title', '//mods:mods[1]/mods:titleInfo/mods:title'));
+          // Limit title to no more than 100 characters
+          $title = (string) reset($title_results);
+          $subtitle_results = $mods->xpath(variable_get('islandora_scholar_xpaths_title_sub_title', '//mods:mods[1]/mods:titleInfo/mods:subTitle'));
+          $subtitle = (string) reset($subtitle_results);
+
+          // Set publisher
+          $publisher_result = $mods->xpath('//mods:mods[1]/mods:originInfo/mods:publisher');
+          $publisher = (string) reset($publisher_result);
+          if (!empty($publisher)) {
+            $jsonLd['publisher'] = [
+              '@type' => 'Person',
+              'name' => $publisher
+            ];
+          }
+
+
+          if (!empty($title)) {
+            if (!empty($subtitle)) {
+              $jsonLd['name'] = "{$title}: {$subtitle}";
+            }
+            else {
+              $jsonLd['name'] = $title;
+            }
+            // Set headline
+            $jsonLd['headline'] = mb_strimwidth($jsonLd['name'], 0, 100, '...');
+          }
+
+          /**
+           * Date in which this particular publication was published
+           *
+           * @see islandora_scholar:islandora_scholar_create_meta_tags
+           **/
+          module_load_include('inc', 'islandora_scholar', 'includes/google_scholar');
+          $tags = islandora_scholar_create_meta_tags($object);
+
+          if ($tags) {
+            $jsonLd['datePublished'] = $tags['citation_publication_date'];
+
+            foreach ($tags['citation_author'] as $author) {
+              $author_parts = explode(', ', $author);
+              $jsonLd['author'][] = [
+                'name' => $author,
+                'givenName' => (isset($author_parts[1]) ? $author_parts[1] : ''),
+                'familyName' => (isset($author_parts[0]) ? $author_parts[0] : ''),
+                '@type' => 'Person'
+              ];
+            }
+          }
+          return json_encode($jsonLd, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+        } else {
+           watchdog('jsond', 'Can\'t find a valid MODS datastream to decode, skipping.');
+           return [];
+        }
       } catch (Exception $e) {
         watchdog('jsond', 'Got exception while parsing.  Message: !msg Errors: !error', [
           '!msg' => $e->getMessage(),
