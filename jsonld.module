@@ -8,7 +8,7 @@
  * @return array|bool|false|string
  */
 function jsonld_create_script_tag($object) {
-  if (!isset($object['MODS']) || !islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['MODS'])) {
+  if (!islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['MODS'])) {
     return FALSE;
   }
 
@@ -60,6 +60,9 @@ function jsonld_create_script_tag($object) {
     if ($object['MODS'] instanceof DOMNode) {
       $mods = simplexml_import_dom($object['MODS']);
     } else {
+      $content = $object['MODS']->content;
+      $mods = simplexml_load_string($content);
+    }
       try {
         if ($mods) {
 
@@ -166,7 +169,6 @@ function jsonld_create_script_tag($object) {
         ]);
         return [];
       }
-    }
   }
   return FALSE;
 }
